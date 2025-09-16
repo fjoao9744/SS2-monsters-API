@@ -30,7 +30,7 @@ class Monsters_v1(APIView):
         return Response(data)
 
 class Monsters_filter_v1(APIView):
-    def get(self, request, family):
+    def get(self, request, family, monster=None):
         base = get_json()
         
         if family.isdigit():
@@ -39,16 +39,18 @@ class Monsters_filter_v1(APIView):
                 return Response({"message": "ops, numero invalido"}, status=400)
             
             family_name, family_choiced = list(base.items())[index]
-            monster_choiced = random.choices(
-                    family_choiced, weights=self.rarity_definy(family_choiced), k=1)[0]
+            monster_choiced = self.get_monster(family_choiced, monster)
+            if monster_choiced is None:
+                return Response({"message": "ops, monstro invalido"}, status=400)
             
-        elif family.replace(" ", "").isalpha():
+        elif family in base:
             try:
                 family_name = family
                 family_choiced = base[family]
-                monster_choiced = random.choices(
-                    family_choiced, weights=self.rarity_definy(family_choiced), k=1)[0]
-            
+                monster_choiced = self.get_monster(family_choiced, monster)
+                if monster_choiced is None:
+                    return Response({"message": "ops, monstro invalido"}, status=400)
+                
             except KeyError:
                 return Response({"message": "ops, familia invalida"}, status=400) 
             
@@ -77,7 +79,22 @@ class Monsters_filter_v1(APIView):
                 chance *= 0.8
             
         return chances
+    
+    def get_monster(self, family_arr, monster=None):
+        if not monster:
+            return random.choices(
+                        family_arr, weights=self.rarity_definy(family_arr), k=1)[0]
+        
+        elif monster in family_arr:
+            return monster
+        
+        elif monster.isdigit():
+            index = int(monster)
+            if not index >= len(family_arr):
+                return family_arr[index]
             
+        return None
+
 class Monsters_info_v1(APIView):
     def get(self, request):
         base = get_json()
@@ -94,7 +111,7 @@ class Monsters_filter_info_v1(APIView):
             
             family_choiced = list(base.values())[index]
             
-        elif family.replace(" ", "").isalpha():
+        elif family.replace(" ", "").replace("-", "").isalpha():
             try:
                 family_choiced = base[family]
                 
