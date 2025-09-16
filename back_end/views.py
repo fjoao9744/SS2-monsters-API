@@ -29,7 +29,79 @@ class Monsters_v1(APIView):
         
         return Response(data)
 
+class Monsters_filter_v1(APIView):
+    def get(self, request, family):
+        base = get_json()
+        
+        if family.isdigit():
+            index = int(family)
+            if index >= len(base):
+                return Response({"message": "ops, numero invalido"}, status=400)
+            
+            family_name, family_choiced = list(base.items())[index]
+            monster_choiced = random.choices(
+                    family_choiced, weights=self.rarity_definy(family_choiced), k=1)[0]
+            
+        elif family.replace(" ", "").isalpha():
+            try:
+                family_name = family
+                family_choiced = base[family]
+                monster_choiced = random.choices(
+                    family_choiced, weights=self.rarity_definy(family_choiced), k=1)[0]
+            
+            except KeyError:
+                return Response({"message": "ops, familia invalida"}, status=400) 
+            
+        else:
+            return Response({"message": "Formato inválido"}, status=400)
+        
+        data = {
+            "name": monster_choiced,
+            "family": family_name,
+            "sprite": f"{bucket_url}/{family_name}/{monster_choiced}.gif"
+        }
+        
+        return Response(data)
+    
+    def rarity_definy(self, monsters_list):
+        chances = []
+        chance = 1
+        rare_chance = 0.1
+        for monster in monsters_list:
+            if "rare" in monster.lower():
+                chances.append(rare_chance)
+                rare_chance *= 0.5
+                
+            else:
+                chances.append(chance)
+                chance *= 0.8
+            
+        return chances
+            
 class Monsters_info_v1(APIView):
     def get(self, request):
         base = get_json()
         return Response(base)
+    
+class Monsters_filter_info_v1(APIView):
+    def get(self, request, family):
+        base = get_json()
+
+        if family.isdigit():
+            index = int(family)
+            if index >= len(base):
+                return Response({"message": "ops, numero invalido"}, status=400)
+            
+            family_choiced = list(base.values())[index]
+            
+        elif family.replace(" ", "").isalpha():
+            try:
+                family_choiced = base[family]
+                
+            except KeyError:
+                return Response({"message": "ops, familia invalida"}, status=400) 
+            
+        else:
+            return Response({"message": "Formato inválido"}, status=400)
+
+        return Response(family_choiced)
