@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
-if os.getenv("IN_PROD"):
+if os.getenv("IN_PROD", "False") == "True":
     DEBUG = False
     ALLOWED_HOSTS = ["domain"]
         
@@ -28,7 +28,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework'
+    'rest_framework',
+    'back_end'
 ]
 
 MIDDLEWARE = [
