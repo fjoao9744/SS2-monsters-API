@@ -140,6 +140,10 @@ class Monsters_v2(APIView):
         monster = random.choice(list(base[family]))
         
         monster["family"] = family
+        monster["monster_num"] = monster["sprite"].replace(".gif", "")
+        monster["sprite"] = f"{bucket_url_v2}/{family}/{monster['sprite']}"
+        
+        print(monster)
         
         return Response(monster)
         
@@ -174,7 +178,8 @@ class Monsters_filter_v2(APIView):
         
         monster_name = monster_choiced["sprite"]
         
-        data = {**monster_choiced, "family": family_name, "sprite": f"{bucket_url_v2}/{family_name}/{monster_name}"}
+        data = {**monster_choiced, "family": family_name, "sprite": f"{bucket_url_v2}/{family_name}/{monster_name}", "monster_num": monster_name.replace(".gif", "")}
+        print(data, monster_name)
         
         return Response(data)
     
@@ -195,7 +200,7 @@ class Monsters_filter_v2(APIView):
     
     def get_monster(self, family_arr, monster=None):
         monsters_names = [f["name"] for f in family_arr]
-        print(family_arr)
+        
         if not monster:
             return random.choices(
                         family_arr, weights=self.rarity_definy(family_arr), k=1)[0]
