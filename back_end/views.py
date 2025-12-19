@@ -141,7 +141,7 @@ class Monsters_v2(APIView):
         
         monster["family"] = family
         monster["monster_num"] = monster["sprite"].replace(".gif", "")
-        monster["sprite"] = f"{bucket_url_v2}/{family}/{monster['sprite']}"
+        monster["sprite"] = f"{bucket_url_v2}/{family}/{monster['monster_num']}.gif"
         
         print(monster)
         
